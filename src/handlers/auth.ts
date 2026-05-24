@@ -94,6 +94,8 @@ export const registerHandler = async function (req, res) {
 export const sessionHandler = function (req, res) {
 	res.set("Content-Type", "application/json");
 
+	req.user.operations = getOperations(req.user.username);
+
 	const token = jwt.sign({ username: req.user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
 	res.cookie("authcookie", token, cookieOpts);
 
