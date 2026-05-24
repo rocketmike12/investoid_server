@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { OperationSchema } from "./operation";
+import { OperationSchema } from "./operation.js";
 
 export const User = mongoose.model(
 	"User",
