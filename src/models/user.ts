@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import { OperationSchema } from "./operation.js";
+import { OperationSchema } from "./operation.ts";
 
 export const User = mongoose.model(
 	"User",
 	new mongoose.Schema({
-		username: {
+		email: {
 			type: String,
 			required: true,
 			unique: true

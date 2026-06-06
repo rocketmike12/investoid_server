@@ -5,10 +5,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { connectDb } from "./config/connectDb.js";
+import { connectDb } from "./config/connectDb.ts";
 import mongoose from "mongoose";
 
-import { authenticateToken, loginHandler, registerHandler, sessionHandler, logoutHandler, operationHandler, delOperationHandler } from "./handlers/auth.js";
+import { authenticateToken, loginHandler, registerHandler, sessionHandler, logoutHandler, operationHandler, delOperationHandler } from "./handlers/auth.ts";
 
 let whitelist = ["http://localhost:5173", "https://rocketmike12.github.io"];
 

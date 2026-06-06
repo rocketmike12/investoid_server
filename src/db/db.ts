@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 
-import { User } from "../models/user.js";
+import { User } from "../models/user.ts";
+import type { Operation } from "../models/operation.ts";
 
-export const getUser = async function (username, password) {
-	const user = await User.findOne({ username }).exec();
+export const getUser = async function (email: string, password: string) {
+	const user = await User.findOne({ email }).exec();
 
 	if (!user) {
 		throw new Error("login incorrect");
@@ -18,8 +19,8 @@ export const getUser = async function (username, password) {
 	return user;
 };
 
-export const getOperations = async function (username) {
-	const user = await User.findOne({ username }).exec();
+export const getOperations = async function (email: string) {
+	const user = await User.findOne({ email }).exec();
 
 	if (!user) {
 		throw new Error("login incorrect");
@@ -28,8 +29,8 @@ export const getOperations = async function (username) {
 	return user.operations;
 };
 
-export const addUser = async function (username, password) {
-	const existingUser = await User.findOne({ username }).exec();
+export const addUser = async function (email: string, password: string) {
+	const existingUser = await User.findOne({ email }).exec();
 
 	if (existingUser) {
 		throw new Error("user already exists");
@@ -38,7 +39,7 @@ export const addUser = async function (username, password) {
 	const hash = await bcrypt.hash(password, 8);
 
 	const user = await User.create({
-		username,
+		email,
 		password: hash,
 		balance: 0,
 		operations: []
@@ -47,9 +48,9 @@ export const addUser = async function (username, password) {
 	return user;
 };
 
-export const addOperation = async function (username, operation) {
+export const addOperation = async function (email: string, operation: Operation) {
 	const user = await User.findOneAndUpdate(
-		{ username },
+		{ email },
 		{
 			$push: {
 				operations: operation
@@ -67,9 +68,9 @@ export const addOperation = async function (username, operation) {
 	return user;
 };
 
-export const delOperation = async function (username, operationId) {
+export const delOperation = async function (email: string, operationId: string) {
 	const user = await User.findOneAndUpdate(
-		{ username },
+		{ email },
 		{
 			$pull: {
 				operations: {

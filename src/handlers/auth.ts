@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 
-import { getUser, addUser, getOperations, addOperation, delOperation } from "../db/db.js";
+import { getUser, addUser, getOperations, addOperation, delOperation } from "../db/db.ts";
 
-const validateUserData = function ({ username, password }) {
-	return typeof username == "string" && username.length >= 3 && /^[a-zA-Z0-9_]{3,32}$/.test(username) && typeof password == "string" && password.length >= 3;
+const validateUserData = function ({ email, password }: { email: string; password: string }) {
+	return email.length >= 3 && /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm.test(email) && password.length >= 3;
 };
 
 const validateOperationData = function ({ date, category, subcategory, sum }) {
@@ -23,7 +23,7 @@ export const authenticateToken = async function (req, res, next) {
 	try {
 		const payload = jwt.verify(authCookie, process.env.ACCESS_TOKEN_SECRET);
 
-		req.user = { username: payload.username };
+		req.user = { email: payload.email };
 
 		next();
 	} catch (err) {
@@ -34,26 +34,28 @@ export const authenticateToken = async function (req, res, next) {
 };
 
 export const loginHandler = async function (req, res) {
-	const { username, password } = req.body;
+	const { email, password } = req.body;
 
 	try {
-		if (!validateUserData({ username, password })) {
+		if (!validateUserData({ email, password })) {
+			console.log("invalid data");
+
 			return res.status(400).json({
 				error: "invalid data"
 			});
 		}
 
-		let userData = await getUser(username, password);
+		let userData = await getUser(email, password);
 
 		if (!userData) {
 			return res.sendStatus(401);
 		}
 
-		const token = jwt.sign({ username: userData.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
+		const token = jwt.sign({ email: userData.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
 		res.cookie("authcookie", token, cookieOpts);
 
 		return res.status(200).json({
-			username: userData.username,
+			email: userData.email,
 			operations: userData.operations
 		});
 	} catch (err) {
@@ -63,30 +65,34 @@ export const loginHandler = async function (req, res) {
 };
 
 export const registerHandler = async function (req, res) {
-	const { username, password } = req.body;
+	const { email, password } = req.body;
 
 	try {
-		if (!validateUserData({ username, password })) {
+		if (!validateUserData({ email, password })) {
+			console.log("invalid data");
+
 			return res.status(400).json({
 				error: "invalid data"
 			});
 		}
 
-		const userData = await addUser(username, password);
+		const userData = await addUser(email, password);
 
-		const token = jwt.sign({ username: userData.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
+		const token = jwt.sign({ email: userData.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
 		res.cookie("authcookie", token, cookieOpts);
 
 		return res.status(200).json({
-			username: userData.username,
+			email: userData.email,
 			operations: userData.operations
 		});
-	} catch (err) {
+	} catch (err: any) {
 		if (err.message === "user already exists") {
+			console.log("user already exists");
+
 			return res.sendStatus(409);
 		}
 
-		console.error(`user ${username} not created:`, err);
+		console.error(`user ${email} not created:`, err);
 		return res.sendStatus(500);
 	}
 };
@@ -94,9 +100,9 @@ export const registerHandler = async function (req, res) {
 export const sessionHandler = function (req, res) {
 	res.set("Content-Type", "application/json");
 
-	req.user.operations = getOperations(req.user.username);
+	req.user.operations = getOperations(req.user.email);
 
-	const token = jwt.sign({ username: req.user.username }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
+	const token = jwt.sign({ email: req.user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
 	res.cookie("authcookie", token, cookieOpts);
 
 	return res.status(200).json(req.user);
@@ -113,24 +119,28 @@ export const operationHandler = async (req, res) => {
 		const { operation } = req.body;
 
 		if (!operation) {
+			console.log("operation missing");
+
 			return res.status(400).json({
 				error: "operation missing"
 			});
 		}
 
 		if (!validateOperationData(operation)) {
+			console.log("invalid data");
+
 			return res.status(400).json({
 				error: "invalid data"
 			});
 		}
 
-		const userData = await addOperation(req.user.username, operation);
+		const userData = await addOperation(req.user.email, operation);
 
 		return res.status(200).json({
 			operations: userData.operations
 		});
 	} catch (err) {
-		console.error(`operation not added to ${req.user.username}:`, err);
+		console.error(`operation not added to ${req.user.email}:`, err);
 
 		return res.sendStatus(500);
 	}
@@ -141,18 +151,20 @@ export const delOperationHandler = async (req, res) => {
 		const { operationId } = req.body;
 
 		if (!operationId) {
+			console.log("operationId missing");
+
 			return res.status(400).json({
 				error: "operationId missing"
 			});
 		}
 
-		const userData = await delOperation(req.user.username, operationId);
+		const userData = await delOperation(req.user.email, operationId);
 
 		return res.status(200).json({
 			operations: userData.operations
 		});
 	} catch (err) {
-		console.error(`operation not deleted from ${req.user.username}:`, err);
+		console.error(`operation not deleted from ${req.user.email}:`, err);
 		return res.sendStatus(500);
 	}
 };
