@@ -1,25 +1,11 @@
 import mongoose from "mongoose";
-import { OperationSchema } from "./operation.ts";
+import { OperationSchema } from "./operation";
 
-export const User = mongoose.model(
-	"User",
-	new mongoose.Schema({
-		email: {
-			type: String,
-			required: true,
-			unique: true
-		},
+const UserSchema = new mongoose.Schema({
+	email: { type: String, required: true, unique: true },
+	password: { type: String, required: true },
+	balance: { type: Number, default: 0 },
+	operations: { type: [OperationSchema], default: [] }
+});
 
-		password: {
-			type: String,
-			required: true
-		},
-
-		balance: {
-			type: Number,
-			default: 0
-		},
-
-		operations: [OperationSchema]
-	})
-);
+export const User = mongoose.model("User", UserSchema);
