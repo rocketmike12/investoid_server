@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 
-import { User } from "../models/user.ts";
-import type { Operation } from "../models/operation.ts";
+import { User } from "../models/user";
+import type { Operation } from "../models/operation";
 
 export const getUser = async function (email: string, password: string) {
 	const user = await User.findOne({ email }).exec();
