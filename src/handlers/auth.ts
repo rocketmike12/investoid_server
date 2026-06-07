@@ -1,19 +1,22 @@
+import type { Response, NextFunction, CookieOptions } from "express";
+import type { AuthRequest, AuthPayload } from "./auth.types";
+
 import jwt from "jsonwebtoken";
 
-import { getUser, addUser, getOperations, addOperation, delOperation } from "../db/db.ts";
+import { getUser, addUser, getOperations, addOperation, delOperation } from "../db/db";
 
 const validateUserData = function ({ email, password }: { email: string; password: string }) {
 	return email.length >= 3 && /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm.test(email) && password.length >= 3;
 };
 
-const validateOperationData = function ({ date, category, subcategory, sum }) {
+const validateOperationData = function ({ date, category, subcategory, sum }: { date: Date; category: string; subcategory: string; sum: number }) {
 	return !isNaN(new Date(date).getTime()) && typeof category == "string" && category.length > 0 && typeof subcategory == "string" && subcategory.length > 0 && typeof sum == "number";
 };
 
-export const cookieOpts =
+export const cookieOpts: CookieOptions =
 	process.env.NODE_ENV === "dev" ? { maxAge: 1000 * 60 * 60 * 24 * 2, httpOnly: true, path: "/" } : { maxAge: 1000 * 60 * 60 * 24 * 2, httpOnly: true, path: "/", sameSite: "none", secure: true };
 
-export const authenticateToken = async function (req, res, next) {
+export const authenticateToken = async function (req: AuthRequest, res: Response, next: NextFunction) {
 	const authCookie = req.cookies["authcookie"];
 
 	if (!authCookie) {
@@ -21,7 +24,7 @@ export const authenticateToken = async function (req, res, next) {
 	}
 
 	try {
-		const payload = jwt.verify(authCookie, process.env.ACCESS_TOKEN_SECRET);
+		const payload = jwt.verify(authCookie, process.env.ACCESS_TOKEN_SECRET) as AuthPayload;
 
 		req.user = { email: payload.email };
 
@@ -33,7 +36,7 @@ export const authenticateToken = async function (req, res, next) {
 	}
 };
 
-export const loginHandler = async function (req, res) {
+export const loginHandler = async function (req: AuthRequest, res: Response) {
 	const { email, password } = req.body;
 
 	try {
@@ -64,7 +67,7 @@ export const loginHandler = async function (req, res) {
 	}
 };
 
-export const registerHandler = async function (req, res) {
+export const registerHandler = async function (req: AuthRequest, res: Response) {
 	const { email, password } = req.body;
 
 	try {
@@ -97,10 +100,10 @@ export const registerHandler = async function (req, res) {
 	}
 };
 
-export const sessionHandler = function (req, res) {
+export const sessionHandler = async function (req: AuthRequest, res: Response) {
 	res.set("Content-Type", "application/json");
 
-	req.user.operations = getOperations(req.user.email);
+	req.user.operations = await getOperations(req.user.email);
 
 	const token = jwt.sign({ email: req.user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
 	res.cookie("authcookie", token, cookieOpts);
@@ -108,13 +111,13 @@ export const sessionHandler = function (req, res) {
 	return res.status(200).json(req.user);
 };
 
-export const logoutHandler = async function (_, res) {
+export const logoutHandler = async function (_: AuthRequest, res: Response) {
 	res.clearCookie("authcookie", cookieOpts);
 
 	res.sendStatus(200);
 };
 
-export const operationHandler = async (req, res) => {
+export const operationHandler = async (req: AuthRequest, res: Response) => {
 	try {
 		const { operation } = req.body;
 
@@ -146,7 +149,7 @@ export const operationHandler = async (req, res) => {
 	}
 };
 
-export const delOperationHandler = async (req, res) => {
+export const delOperationHandler = async (req: AuthRequest, res: Response) => {
 	try {
 		const { operationId } = req.body;
 
