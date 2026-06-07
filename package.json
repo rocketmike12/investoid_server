@@ -3,21 +3,25 @@
 	"version": "0.0.0",
 	"author": "rocketmike12",
 	"type": "module",
-	"main": "main.js",
+	"main": "main.ts",
 	"scripts": {
-		"dev": "NODE_ENV=dev nodemon src/main.js",
-		"start": "node src/main.js"
+		"dev": "NODE_ENV=dev npx tsx watch src/main.ts",
+		"start": "tsx src/main.ts"
 	},
 	"devDependencies": {
 		"@types/express": "^5.0.6",
 		"@types/node": "^25.9.1",
 		"nodemon": "^3.1.14",
 		"ts-node": "^10.9.2",
+		"tsx": "^4.22.4",
 		"typescript": "^6.0.3"
 	},
 	"dependencies": {
 		"@types/bcrypt": "^6.0.0",
+		"@types/cookie-parser": "^1.4.10",
+		"@types/cors": "^2.8.19",
 		"@types/jsonwebtoken": "^9.0.10",
+		"@types/mongoose": "^5.11.96",
 		"axios": "^1.16.1",
 		"bcrypt": "^6.0.0",
 		"cookie-parser": "^1.4.7",
@@ -28,6 +32,10 @@
 		"mongoose": "^9.6.2"
 	},
 	"allowScripts": {
-		"bcrypt@6.0.0": true
+		"bcrypt@6.0.0": true,
+		"tsx@4.22.4": true,
+		"@types/cors@2.8.19": true,
+		"@types/cookie-parser@1.4.10": true,
+		"esbuild@0.28.0": true
 	}
 }
