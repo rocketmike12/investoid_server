@@ -117,7 +117,7 @@ export const logoutHandler = async function (_: AuthRequest, res: Response) {
 	res.sendStatus(200);
 };
 
-export const operationHandler = async (req: AuthRequest, res: Response) => {
+export const addOperationHandler = async (req: AuthRequest, res: Response) => {
 	try {
 		const { operation } = req.body;
 
@@ -151,17 +151,17 @@ export const operationHandler = async (req: AuthRequest, res: Response) => {
 
 export const delOperationHandler = async (req: AuthRequest, res: Response) => {
 	try {
-		const { operationId } = req.body;
+		const { id } = req.body;
 
-		if (!operationId) {
-			console.log("operationId missing");
+		if (!id) {
+			console.log("operation id missing");
 
 			return res.status(400).json({
-				error: "operationId missing"
+				error: "operation id missing"
 			});
 		}
 
-		const userData = await delOperation(req.user.email, operationId);
+		const userData = await delOperation(req.user.email, id);
 
 		return res.status(200).json({
 			operations: userData.operations

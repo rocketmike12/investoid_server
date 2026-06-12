@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 export interface Operation {
+	_id?: string;
 	date: Date;
 	description: string;
 	category: string;
