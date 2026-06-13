@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export interface Operation {
 	_id?: string;
-	date: Date;
+	date: string;
 	description: string;
 	category: string;
 	subcategory: string;
@@ -11,7 +11,7 @@ export interface Operation {
 
 export const OperationSchema = new mongoose.Schema<Operation>(
 	{
-		date: { type: Date, required: true },
+		date: { type: String, required: true },
 		description: { type: String, required: true },
 		category: { type: String, required: true },
 		subcategory: { type: String, required: true },

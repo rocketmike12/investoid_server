@@ -9,8 +9,8 @@ const validateUserData = function ({ email, password }: { email: string; passwor
 	return email.length >= 3 && /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm.test(email) && password.length >= 3;
 };
 
-const validateOperationData = function ({ date, category, subcategory, sum }: { date: Date; category: string; subcategory: string; sum: number }) {
-	return !isNaN(new Date(date).getTime()) && typeof category == "string" && category.length > 0 && typeof subcategory == "string" && subcategory.length > 0 && typeof sum == "number";
+const validateOperationData = function ({ date, category, subcategory, sum }: { date: string; category: string; subcategory: string; sum: number }) {
+	return /\d\d\.\d\d\.\d\d\d\d/.test(date) && typeof category == "string" && category.length > 0 && typeof subcategory == "string" && subcategory.length > 0 && typeof sum == "number";
 };
 
 export const cookieOpts: CookieOptions =
