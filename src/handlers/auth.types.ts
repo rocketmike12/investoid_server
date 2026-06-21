@@ -8,6 +8,7 @@ import type { JwtPayload } from "jsonwebtoken";
 export interface AuthRequest extends Request {
 	user: {
 		email: string;
+		balance?: number;
 		operations?: mongoose.Types.DocumentArray<Operation>;
 	};
 }

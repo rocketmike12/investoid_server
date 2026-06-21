@@ -3,7 +3,7 @@ import type { AuthRequest, AuthPayload } from "./auth.types";
 
 import jwt from "jsonwebtoken";
 
-import { getUser, addUser, getOperations, addOperation, delOperation } from "../db/db";
+import { getUser, addUser, getOperations, addOperation, delOperation, setBalance, getBalance } from "../db/db";
 
 const validateUserData = function ({ email, password }: { email: string; password: string }) {
 	return email.length >= 3 && /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm.test(email) && password.length >= 3;
@@ -59,6 +59,7 @@ export const loginHandler = async function (req: AuthRequest, res: Response) {
 
 		return res.status(200).json({
 			email: userData.email,
+			balance: userData.balance + userData.operations.reduce((acc, val) => acc + val.sum, 0),
 			operations: userData.operations
 		});
 	} catch (err) {
@@ -86,6 +87,7 @@ export const registerHandler = async function (req: AuthRequest, res: Response) 
 
 		return res.status(200).json({
 			email: userData.email,
+			balance: userData.balance + userData.operations.reduce((acc, val) => acc + val.sum, 0),
 			operations: userData.operations
 		});
 	} catch (err: any) {
@@ -104,11 +106,12 @@ export const sessionHandler = async function (req: AuthRequest, res: Response) {
 	res.set("Content-Type", "application/json");
 
 	req.user.operations = await getOperations(req.user.email);
+	req.user.balance = (await getBalance(req.user.email)) + req.user.operations.reduce((acc, val) => acc + val.sum, 0);
 
 	const token = jwt.sign({ email: req.user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2d" });
 	res.cookie("authcookie", token, cookieOpts);
 
-	return res.status(200).json(req.user);
+	return res.status(200).json({ email: req.user.email, balance: req.user.balance, operations: req.user.operations });
 };
 
 export const logoutHandler = async function (_: AuthRequest, res: Response) {
@@ -138,9 +141,11 @@ export const addOperationHandler = async (req: AuthRequest, res: Response) => {
 		}
 
 		const userData = await addOperation(req.user.email, operation);
+		const balance = await getBalance(req.user.email);
 
 		return res.status(200).json({
-			operations: userData.operations
+			operations: userData.operations,
+			balance: balance + userData.operations.reduce((acc, val) => acc + val.sum, 0)
 		});
 	} catch (err) {
 		console.error(`operation not added to ${req.user.email}:`, err);
@@ -162,9 +167,36 @@ export const delOperationHandler = async (req: AuthRequest, res: Response) => {
 		}
 
 		const userData = await delOperation(req.user.email, id);
+		const balance = await getBalance(req.user.email);
 
 		return res.status(200).json({
-			operations: userData.operations
+			operations: userData.operations,
+			balance: balance + userData.operations.reduce((acc, val) => acc + val.sum, 0)
+		});
+	} catch (err) {
+		console.error(`operation not deleted from ${req.user.email}:`, err);
+		return res.sendStatus(500);
+	}
+};
+
+export const setBalanceHandler = async (req: AuthRequest, res: Response) => {
+	try {
+		const { balance } = req.body;
+
+		if (!Number.isInteger(balance)) {
+			return res.sendStatus(400);
+		}
+
+		const operations = await getOperations(req.user.email);
+		operations.forEach(async (operation) => {
+			await delOperation(req.user.email, operation._id);
+		});
+
+		const userData = await setBalance(req.user.email, balance);
+
+		return res.status(200).json({
+			operations: userData.operations,
+			balance: balance
 		});
 	} catch (err) {
 		console.error(`operation not deleted from ${req.user.email}:`, err);

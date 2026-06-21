@@ -56,9 +56,7 @@ export const addOperation = async function (email: string, operation: Operation)
 				operations: operation
 			}
 		},
-		{
-			new: true
-		}
+		{ returnDocument: "after" }
 	).exec();
 
 	if (!user) {
@@ -78,9 +76,35 @@ export const delOperation = async function (email: string, operationId: string) 
 				}
 			}
 		},
+		{ returnDocument: "after" }
+	).exec();
+
+	if (!user) {
+		throw new Error("login incorrect");
+	}
+
+	return user;
+};
+
+export const getBalance = async function (email: string) {
+	const user = await User.findOne({ email });
+
+	if (!user) {
+		throw new Error("login incorrect");
+	}
+
+	return user.balance;
+};
+
+export const setBalance = async function (email: string, balance: number) {
+	const user = await User.findOneAndUpdate(
+		{ email },
 		{
-			new: true
-		}
+			$set: {
+				balance: balance
+			}
+		},
+		{ returnDocument: "after" }
 	).exec();
 
 	if (!user) {

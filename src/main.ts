@@ -8,7 +8,7 @@ dotenv.config();
 import { connectDb } from "./config/connectDb";
 import mongoose from "mongoose";
 
-import { authenticateToken, loginHandler, registerHandler, sessionHandler, logoutHandler, addOperationHandler, delOperationHandler } from "./handlers/auth";
+import { authenticateToken, loginHandler, registerHandler, sessionHandler, logoutHandler, addOperationHandler, delOperationHandler, setBalanceHandler } from "./handlers/auth";
 
 let whitelist = ["http://localhost:5173", "https://rocketmike12.github.io"];
 
@@ -41,6 +41,7 @@ app.post("/api/v0/auth/session/", authenticateToken, sessionHandler);
 app.post("/api/v0/auth/logout/", authenticateToken, logoutHandler);
 app.post("/api/v0/auth/operation/add", authenticateToken, addOperationHandler);
 app.post("/api/v0/auth/operation/del", authenticateToken, delOperationHandler);
+app.post("/api/v0/auth/balance", authenticateToken, setBalanceHandler);
 
 mongoose.connection.once("open", () => {
 	app.listen(8080, () => {
