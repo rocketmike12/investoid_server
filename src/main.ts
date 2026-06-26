@@ -38,7 +38,7 @@ connectDb();
 app.post("/api/v0/auth/login/", loginHandler);
 app.post("/api/v0/auth/register/", registerHandler);
 app.post("/api/v0/auth/session/", authenticateToken, sessionHandler);
-app.post("/api/v0/auth/logout/", authenticateToken, logoutHandler);
+app.post("/api/v0/auth/logout/", logoutHandler);
 app.post("/api/v0/auth/operation/add/", authenticateToken, addOperationHandler);
 app.post("/api/v0/auth/operation/del/", authenticateToken, delOperationHandler);
 app.post("/api/v0/auth/balance/", authenticateToken, setBalanceHandler);
