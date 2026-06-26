@@ -188,9 +188,7 @@ export const setBalanceHandler = async (req: AuthRequest, res: Response) => {
 		}
 
 		const operations = await getOperations(req.user.email);
-		operations.forEach(async (operation) => {
-			await delOperation(req.user.email, operation._id);
-		});
+		await Promise.all(operations.map((operation) => delOperation(req.user.email, operation._id)));
 
 		const userData = await setBalance(req.user.email, balance);
 
