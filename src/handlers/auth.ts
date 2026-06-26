@@ -115,7 +115,7 @@ export const sessionHandler = async function (req: AuthRequest, res: Response) {
 };
 
 export const logoutHandler = async function (_: AuthRequest, res: Response) {
-	res.clearCookie("authcookie");
+	res.clearCookie("authcookie", cookieOpts);
 
 	res.sendStatus(200);
 };
